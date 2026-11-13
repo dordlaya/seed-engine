@@ -12,17 +12,8 @@
             opacity: 0;
             transform: scale(0.5);
         }
-        .ball.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .seek-wrap {
-            position: relative;
-            margin-top: 0.5rem;
-            padding: 0.15rem 0;
-        }
-
+        .ball.show { opacity: 1; transform: scale(1); }
+        .seek-wrap { position: relative; margin-top: 0.5rem; padding: 0.15rem 0; }
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -30,52 +21,33 @@
             height: 10px;
             border-radius: 9999px;
             border: 1px solid rgba(148, 163, 184, 0.18);
-            background: linear-gradient(
-                to right,
-                rgba(250, 204, 21, 1) 0%,
-                rgba(250, 204, 21, 1) var(--percent),
-                rgba(31, 41, 55, 0.95) var(--percent),
-                rgba(31, 41, 55, 0.95) 100%
-            );
+            background: linear-gradient(to right, #facc15 0%, #facc15 var(--percent), rgba(31, 41, 55, 0.95) var(--percent), rgba(31, 41, 55, 0.95) 100%);
             box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.08);
             outline: none;
             cursor: pointer;
-            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            transition: box-shadow 0.2s ease;
         }
-
-        input[type="range"]:hover {
-            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.18), 0 0 18px rgba(250, 204, 21, 0.08);
+        input[type="range"]:hover, input[type="range"]:focus-visible {
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.18), 0 0 18px rgba(250, 204, 21, 0.12);
         }
-
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 18px;
             height: 18px;
-            border-radius: 9999px;
+            border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #facc15 30%, #d97706 100%);
             border: 2px solid rgba(17, 24, 39, 0.9);
             box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18), 0 8px 20px rgba(250, 204, 21, 0.35);
-            transition: transform 0.15s ease;
         }
-
-        input[type="range"]:active::-webkit-slider-thumb,
-        input[type="range"]:focus-visible::-webkit-slider-thumb {
-            transform: scale(1.08);
-        }
-
         input[type="range"]::-moz-range-thumb {
             width: 18px;
             height: 18px;
             border: 2px solid rgba(17, 24, 39, 0.9);
-            border-radius: 9999px;
+            border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #facc15 30%, #d97706 100%);
             box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18), 0 8px 20px rgba(250, 204, 21, 0.35);
         }
-
-        input[type="range"]::-moz-range-track {
-            background: transparent;
-        }
-
+        input[type="range"]::-moz-range-track { background: transparent; }
         .value-pill {
             background: rgba(250, 204, 21, 0.1);
             border: 1px solid rgba(250, 204, 21, 0.25);
@@ -86,211 +58,267 @@
             text-align: center;
         }
     </style>
-    <script>
-        function toggleGuide() {
-            const content = document.getElementById('guideContent');
-            const icon = document.getElementById('guideIcon');
-            content.classList.toggle('hidden');
-            icon.classList.toggle('rotate-180');
-        }
-
-        function updateSeekFill(input) {
-            const min = Number(input.min || 0);
-            const max = Number(input.max || 100);
-            const value = Number(input.value || min);
-            const percent = ((value - min) / (max - min)) * 100;
-            input.style.setProperty('--percent', percent + '%');
-        }
-    </script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-2xl w-full bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
+    <main class="max-w-3xl w-full bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 border border-gray-700">
         <h1 class="text-3xl font-bold text-center text-yellow-500 mb-2">Kinematic Resonance Engine ⚙️</h1>
-        <p class="text-gray-400 text-center mb-6 text-sm">Simulating physical beat frequencies and trapdoor ejection.</p>
+        <p class="text-gray-400 text-center mb-6 text-sm">Adjust the frequencies and watch the resonance preview before generating a draw.</p>
 
-        <div class="mb-8 border border-gray-700 rounded-lg bg-gray-900/50 overflow-hidden">
-            <button type="button" onclick="toggleGuide()" class="w-full px-4 py-3 text-left text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none flex justify-between items-center">
-                <span>⚙️ Kinematic Tuning Guide</span>
-                <svg id="guideIcon" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+        <section class="mb-8 border border-gray-700 rounded-lg bg-gray-900/50 overflow-hidden">
+            <button type="button" id="guideToggle" aria-expanded="false" aria-controls="guideContent" class="w-full px-4 py-3 text-left text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 flex justify-between items-center">
+                <span>⚙️ How to tune for a clear resonance</span>
+                <svg id="guideIcon" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div id="guideContent" class="hidden px-4 py-3 text-sm text-gray-400 border-t border-gray-700 space-y-4 bg-gray-800">
-                <div>
-                    <strong class="text-sky-400">1. Motor Base (Hz) - The Spinning Paddle</strong><br>
-                    Standard machines use mechanical paddles rotating at ~45-50 RPM (approx <strong>0.75 Hz</strong>). Adjust this to set the drum's primary mechanical rhythm.
-                </div>
-                <div>
-                    <strong class="text-sky-400">2. Kinetic Mass (Hz) - The Bouncing Balls</strong><br>
-                    The chaos of 37 bouncing spheres creates secondary interference. A value of <strong>3.14 Hz</strong> ($\pi$) provides a natural, chaotic ricochet frequency.
-                </div>
-                <div class="bg-gray-900 p-3 rounded border border-gray-700">
-                    <strong class="text-yellow-500">How to Tune (The Red Dots)</strong><br>
-                    Watch the graph for <strong>Red Dots</strong>. These represent the exact milliseconds the trapdoor swings open (Internal Pressure &gt; 1.90). Tune the frequencies until you see distinct, separated peaks.
-                </div>
+            <div id="guideContent" class="hidden px-4 py-3 text-sm text-gray-400 border-t border-gray-700 space-y-3 bg-gray-800">
+                <p><strong class="text-sky-400">1.</strong> Move either slider. The graph and score update immediately; you do not need to generate a draw to compare settings.</p>
+                <p><strong class="text-sky-400">2.</strong> The cyan curve is combined resonance. Red sections/dots are where it passes the dashed 1.90 trapdoor threshold.</p>
+                <p><strong class="text-sky-400">3.</strong> Use the threshold crossings and preview score to understand the simulated motion, then select <strong class="text-gray-200">Spin Virtual Drum</strong> to generate a result.</p>
+                <p class="text-yellow-300">The score describes resonance activity in the graph preview only. It does not rate the drawn numbers or predict lottery outcomes/chances.</p>
             </div>
-        </div>
+        </section>
 
-        <form id="drawForm" class="space-y-6 mb-4">
+        <form id="drawForm" class="space-y-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label for="motorInput" class="text-sm font-medium text-gray-300">Motor Base (Hz)</label>
                         <output id="motorValue" for="motorInput" class="value-pill text-sm font-semibold text-yellow-400">0.75</output>
                     </div>
-                    <div class="seek-wrap">
-                        <input type="range" id="motorInput" required step="0.01" min="0.1" max="5.0" value="0.75" aria-label="Motor Base frequency">
-                    </div>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1</span><span>5.0</span></div>
+                    <div class="seek-wrap"><input type="range" id="motorInput" step="0.01" min="0.1" max="5.0" value="0.75" aria-label="Motor Base frequency"></div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1 Hz</span><span>5.0 Hz</span></div>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label for="kineticInput" class="text-sm font-medium text-gray-300">Kinetic Mass (Hz)</label>
                         <output id="kineticValue" for="kineticInput" class="value-pill text-sm font-semibold text-yellow-400">3.14</output>
                     </div>
-                    <div class="seek-wrap">
-                        <input type="range" id="kineticInput" required step="0.01" min="0.1" max="10.0" value="3.14" aria-label="Kinetic Mass frequency">
-                    </div>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1</span><span>10.0</span></div>
+                    <div class="seek-wrap"><input type="range" id="kineticInput" step="0.01" min="0.1" max="10.0" value="3.14" aria-label="Kinetic Mass frequency"></div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1 Hz</span><span>10.0 Hz</span></div>
                 </div>
             </div>
-
-            <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(202,138,4,0.5)]">
-                Spin Virtual Drum
-            </button>
+            <button type="submit" id="drawButton" class="w-full bg-yellow-600 hover:bg-yellow-500 disabled:opacity-60 disabled:cursor-wait text-gray-900 font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(202,138,4,0.5)]">Spin Virtual Drum</button>
         </form>
 
-        <div id="lirazNote" class="text-center mb-6 text-pink-400 font-medium italic min-h-[24px] transition-opacity duration-300 opacity-0"></div>
-
-        <div id="resultsContainer" class="hidden">
-            <h2 class="text-lg font-semibold text-center text-gray-300 mb-4 border-t border-gray-700 pt-6">Ejected Sequence</h2>
-            <div id="ballsWrapper" class="flex justify-center items-center gap-3 flex-wrap mb-8"></div>
-            <h2 class="text-sm font-semibold text-center text-gray-400 mb-2">Beat Frequency Resonance (Trapdoor Open at Peaks)</h2>
-            <div class="w-full bg-gray-900 rounded-lg p-4 border border-gray-700">
-                <canvas id="waveChart" height="120"></canvas>
+        <section class="mb-6" aria-labelledby="previewTitle">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-3">
+                <div>
+                    <h2 id="previewTitle" class="text-lg font-semibold text-gray-200">10-second resonance preview</h2>
+                    <p class="text-xs text-gray-500 mt-1">Red highlights show simulated trapdoor openings (combined wave &gt; 1.90).</p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
+                        <div class="text-[10px] uppercase tracking-wide text-gray-500">Activity score</div>
+                        <div class="text-xl font-bold text-yellow-400"><span id="activityScore">0</span><span class="text-sm text-gray-500">/100</span></div>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
+                        <div class="text-[10px] uppercase tracking-wide text-gray-500">Openings</div>
+                        <div class="text-xl font-bold text-red-400"><span id="openingCount">0</span><span class="text-sm text-gray-500"> / 10s</span></div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+            <div class="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700">
+                <div class="relative h-64 sm:h-72"><canvas id="waveChart" role="img" aria-label="Resonance preview graph showing motor, kinetic, and combined waves against the trapdoor threshold"></canvas></div>
+                <p id="scoreExplanation" class="text-xs text-gray-500 mt-3">Activity score is the percentage of preview samples above the 1.90 threshold. It is a tuning aid, not a result-quality or odds score.</p>
+            </div>
+        </section>
+
+        <section id="resultsContainer" class="hidden" aria-live="polite">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-700 pt-5 mb-4">
+                <h2 class="text-lg font-semibold text-gray-200">Generated result</h2>
+                <div class="text-sm text-gray-300">Resonance activity for these settings: <strong class="text-yellow-400"><span id="resultScore">0</span>/100</strong></div>
+            </div>
+            <p class="text-xs text-gray-500 text-center mb-4">This score characterizes the frequency preview, not the numbers or their chance of winning.</p>
+            <div id="ballsWrapper" class="flex justify-center items-center gap-3 flex-wrap mb-8"></div>
+        </section>
+        <p id="errorMessage" class="hidden text-red-400 text-center text-sm" role="alert"></p>
+    </main>
 
     <script>
+        const THRESHOLD = 1.9;
+        const PREVIEW_SECONDS = 10;
+        const SAMPLE_STEP = 0.02;
         let waveChartInstance = null;
 
         const motorInput = document.getElementById('motorInput');
         const kineticInput = document.getElementById('kineticInput');
+        const drawButton = document.getElementById('drawButton');
 
-        function syncSliderValue(input, outputId) {
-            const output = document.getElementById(outputId);
-            const value = Number(input.value).toFixed(2);
-            output.textContent = value;
-            updateSeekFill(input);
-        }
-
-        syncSliderValue(motorInput, 'motorValue');
-        syncSliderValue(kineticInput, 'kineticValue');
-
-        motorInput.addEventListener('input', () => syncSliderValue(motorInput, 'motorValue'));
-        kineticInput.addEventListener('input', () => syncSliderValue(kineticInput, 'kineticValue'));
-
-        document.getElementById('drawForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const motorHz = motorInput.value;
-            const kineticHz = kineticInput.value;
-            const btn = e.target.querySelector('button[type="submit"]');
-            const wrapper = document.getElementById('ballsWrapper');
-            const lirazNote = document.getElementById('lirazNote');
-
-            lirazNote.textContent = '';
-            lirazNote.classList.remove('opacity-0');
-            btn.disabled = true;
-            btn.textContent = 'Simulating Trapdoor Ejections...';
-            wrapper.innerHTML = '';
-            document.getElementById('resultsContainer').classList.remove('hidden');
-            drawResonanceChart(parseFloat(motorHz), parseFloat(kineticHz));
-
-            try {
-                const res = await fetch(`api/draw?motor=${motorHz}&kinetic=${kineticHz}`);
-                const data = await res.json();
-                if (!res.ok || data.error) throw new Error(data.error || 'Draw failed');
-
-                data.yielded_numbers.forEach((num, i) => {
-                    const ball = document.createElement('div');
-                    ball.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center text-gray-900 font-bold text-xl shadow-lg';
-                    ball.textContent = num;
-                    wrapper.appendChild(ball);
-                    setTimeout(() => ball.classList.add('show'), i * 150);
-                });
-
-                const plus = document.createElement('div');
-                plus.className = 'ball w-8 h-12 flex items-center justify-center text-gray-500 font-bold text-2xl';
-                plus.textContent = '+';
-                wrapper.appendChild(plus);
-
-                const strongBall = document.createElement('div');
-                strongBall.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center text-white font-bold text-xl shadow-lg';
-                strongBall.textContent = data.strong_number;
-                wrapper.appendChild(strongBall);
-                setTimeout(() => { plus.classList.add('show'); strongBall.classList.add('show'); }, 900);
-            } catch (err) {
-                wrapper.innerHTML = '<p class="text-red-400 text-center w-full">Hardware Simulation Error</p>';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Spin Virtual Drum';
-            }
+        document.getElementById('guideToggle').addEventListener('click', () => {
+            const button = document.getElementById('guideToggle');
+            const content = document.getElementById('guideContent');
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', String(!expanded));
+            content.classList.toggle('hidden', expanded);
+            document.getElementById('guideIcon').classList.toggle('rotate-180', !expanded);
         });
 
-        function drawResonanceChart(motorHz, kineticHz) {
-            const ctx = document.getElementById('waveChart').getContext('2d');
-            const labels = [];
-            const dataPoints = [];
-            const pointColors = [];
-            const pointRadii = [];
+        function updateSeekFill(input) {
+            const min = Number(input.min);
+            const max = Number(input.max);
+            const percent = ((Number(input.value) - min) / (max - min)) * 100;
+            input.style.setProperty('--percent', `${percent}%`);
+        }
 
-            for (let t = 0; t <= 3.0; t += 0.01) {
-                labels.push(t.toFixed(2) + 's');
-                const w1 = Math.sin(2 * Math.PI * motorHz * t);
-                const w2 = Math.sin(2 * Math.PI * kineticHz * t);
-                const compoundWave = w1 + w2;
-                dataPoints.push(compoundWave);
-                if (compoundWave > 1.9) {
-                    pointColors.push('rgba(239, 68, 68, 1)');
-                    pointRadii.push(3);
-                } else {
-                    pointColors.push('rgba(0,0,0,0)');
-                    pointRadii.push(0);
-                }
+        function buildPreview(motorHz, kineticHz) {
+            const labels = [];
+            const motorWave = [];
+            const kineticWave = [];
+            const combinedWave = [];
+            let activeSamples = 0;
+            let openings = 0;
+            let wasOpen = false;
+
+            for (let index = 0; index <= PREVIEW_SECONDS / SAMPLE_STEP; index++) {
+                const t = index * SAMPLE_STEP;
+                const motor = Math.sin(2 * Math.PI * motorHz * t);
+                const kinetic = Math.sin(2 * Math.PI * kineticHz * t);
+                const combined = motor + kinetic;
+                const isOpen = combined > THRESHOLD;
+
+                labels.push(t);
+                motorWave.push(motor);
+                kineticWave.push(kinetic);
+                combinedWave.push(combined);
+                if (isOpen) activeSamples++;
+                if (isOpen && !wasOpen) openings++;
+                wasOpen = isOpen;
             }
 
+            return {
+                labels,
+                motorWave,
+                kineticWave,
+                combinedWave,
+                score: Math.round((activeSamples / combinedWave.length) * 100),
+                openings
+            };
+        }
+
+        function drawResonanceChart(motorHz, kineticHz) {
+            const preview = buildPreview(motorHz, kineticHz);
+            document.getElementById('activityScore').textContent = preview.score;
+            document.getElementById('openingCount').textContent = preview.openings;
+            document.getElementById('resultScore').textContent = preview.score;
+
             if (waveChartInstance) waveChartInstance.destroy();
-            waveChartInstance = new Chart(ctx, {
+            waveChartInstance = new Chart(document.getElementById('waveChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels,
-                    datasets: [{
-                        label: 'Internal Kinetic Pressure',
-                        data: dataPoints,
-                        borderColor: 'rgba(56, 189, 248, 0.8)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        pointBackgroundColor: pointColors,
-                        pointRadius: pointRadii,
-                    }]
+                    labels: preview.labels,
+                    datasets: [
+                        {
+                            label: 'Motor wave', data: preview.motorWave,
+                            borderColor: 'rgba(250, 204, 21, 0.45)', borderWidth: 1.5,
+                            pointRadius: 0, tension: 0.15
+                        },
+                        {
+                            label: 'Kinetic wave', data: preview.kineticWave,
+                            borderColor: 'rgba(167, 139, 250, 0.55)', borderWidth: 1.5,
+                            pointRadius: 0, tension: 0.15
+                        },
+                        {
+                            label: 'Combined resonance', data: preview.combinedWave,
+                            borderColor: (context) => {
+                                const value = context.raw;
+                                return value !== undefined && value > THRESHOLD ? '#f87171' : '#38bdf8';
+                            },
+                            segment: { borderColor: (context) => context.p1.parsed.y > THRESHOLD ? '#f87171' : '#38bdf8' },
+                            borderWidth: 2.5, pointRadius: (context) => context.raw > THRESHOLD ? 2 : 0,
+                            pointBackgroundColor: '#f87171', tension: 0.15
+                        },
+                        {
+                            label: 'Trapdoor threshold (1.90)',
+                            data: preview.labels.map(() => THRESHOLD),
+                            borderColor: 'rgba(248, 113, 113, 0.7)', borderWidth: 1,
+                            borderDash: [6, 5], pointRadius: 0, tension: 0
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { color: '#9ca3af', usePointStyle: true, boxWidth: 8, padding: 14 } },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => `${Number(items[0].label).toFixed(2)} seconds`,
+                                label: (item) => `${item.dataset.label}: ${Number(item.raw).toFixed(2)}`
+                            }
+                        }
+                    },
                     scales: {
-                        x: { display: false },
+                        x: {
+                            type: 'linear', min: 0, max: PREVIEW_SECONDS,
+                            title: { display: true, text: 'Time (seconds)', color: '#9ca3af' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 6 },
+                            grid: { color: 'rgba(75, 85, 99, 0.18)' }
+                        },
                         y: {
-                            display: true,
-                            grid: { color: 'rgba(75, 85, 99, 0.3)' },
-                            min: -2.5,
-                            max: 2.5
+                            min: -2.1, max: 2.1,
+                            title: { display: true, text: 'Wave amplitude', color: '#9ca3af' },
+                            ticks: { color: '#6b7280' },
+                            grid: { color: 'rgba(75, 85, 99, 0.25)' }
                         }
                     }
                 }
             });
         }
+
+        function syncSlider(input, outputId) {
+            document.getElementById(outputId).textContent = Number(input.value).toFixed(2);
+            updateSeekFill(input);
+            drawResonanceChart(Number(motorInput.value), Number(kineticInput.value));
+        }
+
+        motorInput.addEventListener('input', () => syncSlider(motorInput, 'motorValue'));
+        kineticInput.addEventListener('input', () => syncSlider(kineticInput, 'kineticValue'));
+        syncSlider(motorInput, 'motorValue');
+        syncSlider(kineticInput, 'kineticValue');
+
+        document.getElementById('drawForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const wrapper = document.getElementById('ballsWrapper');
+            const errorMessage = document.getElementById('errorMessage');
+            const motorHz = Number(motorInput.value);
+            const kineticHz = Number(kineticInput.value);
+            wrapper.innerHTML = '';
+            errorMessage.classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            drawResonanceChart(motorHz, kineticHz);
+            drawButton.disabled = true;
+            drawButton.textContent = 'Simulating…';
+
+            try {
+                const params = new URLSearchParams({ motor: String(motorHz), kinetic: String(kineticHz) });
+                const response = await fetch(`api/draw?${params}`);
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'The draw request failed.');
+
+                data.yielded_numbers.forEach((number, index) => {
+                    const ball = document.createElement('div');
+                    ball.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center text-gray-900 font-bold text-xl shadow-lg';
+                    ball.textContent = number;
+                    wrapper.appendChild(ball);
+                    setTimeout(() => ball.classList.add('show'), index * 150);
+                });
+                const plus = document.createElement('div');
+                plus.className = 'ball w-8 h-12 flex items-center justify-center text-gray-500 font-bold text-2xl show';
+                plus.textContent = '+';
+                wrapper.appendChild(plus);
+                const strongBall = document.createElement('div');
+                strongBall.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center text-white font-bold text-xl shadow-lg';
+                strongBall.textContent = data.strong_number;
+                wrapper.appendChild(strongBall);
+                setTimeout(() => strongBall.classList.add('show'), 900);
+            } catch (error) {
+                errorMessage.textContent = error.message || 'Could not generate a result. Please try again.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                drawButton.disabled = false;
+                drawButton.textContent = 'Spin Virtual Drum';
+            }
+        });
     </script>
 </body>
 </html>
