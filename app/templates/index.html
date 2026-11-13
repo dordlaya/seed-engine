@@ -16,9 +16,50 @@
             opacity: 1;
             transform: scale(1);
         }
+
+        .seek-wrap {
+            position: relative;
+            margin-top: 0.5rem;
+        }
+
         input[type="range"] {
-            accent-color: #eab308;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 9999px;
+            background: linear-gradient(
+                to right,
+                rgba(250, 204, 21, 1) 0%,
+                rgba(250, 204, 21, 1) var(--percent),
+                rgba(75, 85, 99, 0.9) var(--percent),
+                rgba(75, 85, 99, 0.9) 100%
+            );
+            outline: none;
             cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            background: #facc15;
+            border: 2px solid #1f2937;
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #1f2937;
+            border-radius: 9999px;
+            background: #facc15;
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.2);
+        }
+
+        input[type="range"]::-moz-range-track {
+            background: transparent;
         }
     </style>
     <script>
@@ -27,6 +68,14 @@
             const icon = document.getElementById('guideIcon');
             content.classList.toggle('hidden');
             icon.classList.toggle('rotate-180');
+        }
+
+        function updateSeekFill(input) {
+            const min = Number(input.min || 0);
+            const max = Number(input.max || 100);
+            const value = Number(input.value || min);
+            const percent = ((value - min) / (max - min)) * 100;
+            input.style.setProperty('--percent', percent + '%');
         }
     </script>
 </head>
@@ -65,16 +114,20 @@
                         <label for="motorInput" class="text-sm font-medium text-gray-300">Motor Base (Hz)</label>
                         <output id="motorValue" for="motorInput" class="text-sm font-semibold text-yellow-400">0.75</output>
                     </div>
-                    <input type="range" id="motorInput" required step="0.01" min="0.1" max="5.0" value="0.75" aria-label="Motor Base frequency" class="w-full h-2 rounded-lg appearance-none bg-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                    <div class="flex justify-between text-xs text-gray-500 mt-1"><span>0.1 Hz</span><span>5.0 Hz</span></div>
+                    <div class="seek-wrap">
+                        <input type="range" id="motorInput" required step="0.01" min="0.1" max="5.0" value="0.75" aria-label="Motor Base frequency">
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1</span><span>5.0</span></div>
                 </div>
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label for="kineticInput" class="text-sm font-medium text-gray-300">Kinetic Mass (Hz)</label>
                         <output id="kineticValue" for="kineticInput" class="text-sm font-semibold text-yellow-400">3.14</output>
                     </div>
-                    <input type="range" id="kineticInput" required step="0.01" min="0.1" max="10.0" value="3.14" aria-label="Kinetic Mass frequency" class="w-full h-2 rounded-lg appearance-none bg-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                    <div class="flex justify-between text-xs text-gray-500 mt-1"><span>0.1 Hz</span><span>10.0 Hz</span></div>
+                    <div class="seek-wrap">
+                        <input type="range" id="kineticInput" required step="0.01" min="0.1" max="10.0" value="3.14" aria-label="Kinetic Mass frequency">
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1</span><span>10.0</span></div>
                 </div>
             </div>
 
@@ -100,12 +153,19 @@
 
         const motorInput = document.getElementById('motorInput');
         const kineticInput = document.getElementById('kineticInput');
-        motorInput.addEventListener('input', () => {
-            document.getElementById('motorValue').value = Number(motorInput.value).toFixed(2);
-        });
-        kineticInput.addEventListener('input', () => {
-            document.getElementById('kineticValue').value = Number(kineticInput.value).toFixed(2);
-        });
+
+        function syncSliderValue(input, outputId) {
+            const output = document.getElementById(outputId);
+            const value = Number(input.value).toFixed(2);
+            output.textContent = value;
+            updateSeekFill(input);
+        }
+
+        syncSliderValue(motorInput, 'motorValue');
+        syncSliderValue(kineticInput, 'kineticValue');
+
+        motorInput.addEventListener('input', () => syncSliderValue(motorInput, 'motorValue'));
+        kineticInput.addEventListener('input', () => syncSliderValue(kineticInput, 'kineticValue'));
 
         document.getElementById('drawForm').addEventListener('submit', async (e) => {
             e.preventDefault();
