@@ -7,137 +7,111 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .ball {
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-            opacity: 0;
-            transform: scale(0.5);
-        }
+        .ball { transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; opacity: 0; transform: scale(0.5); }
         .ball.show { opacity: 1; transform: scale(1); }
         .seek-wrap { position: relative; margin-top: 0.5rem; padding: 0.15rem 0; }
         input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 10px;
-            border-radius: 9999px;
+            -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 9999px;
             border: 1px solid rgba(148, 163, 184, 0.18);
             background: linear-gradient(to right, #facc15 0%, #facc15 var(--percent), rgba(31, 41, 55, 0.95) var(--percent), rgba(31, 41, 55, 0.95) 100%);
-            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.08);
-            outline: none;
-            cursor: pointer;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.08); outline: none; cursor: pointer;
             transition: box-shadow 0.2s ease;
         }
-        input[type="range"]:hover, input[type="range"]:focus-visible {
-            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.18), 0 0 18px rgba(250, 204, 21, 0.12);
-        }
+        input[type="range"]:hover, input[type="range"]:focus-visible { box-shadow: 0 0 18px rgba(250, 204, 21, 0.15); }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #facc15 30%, #d97706 100%);
-            border: 2px solid rgba(17, 24, 39, 0.9);
-            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18), 0 8px 20px rgba(250, 204, 21, 0.35);
+            border: 2px solid rgba(17, 24, 39, 0.9); box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18), 0 8px 20px rgba(250, 204, 21, 0.35);
         }
         input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(17, 24, 39, 0.9);
-            border-radius: 50%;
+            width: 18px; height: 18px; border: 2px solid rgba(17, 24, 39, 0.9); border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #facc15 30%, #d97706 100%);
             box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18), 0 8px 20px rgba(250, 204, 21, 0.35);
         }
         input[type="range"]::-moz-range-track { background: transparent; }
-        .value-pill {
-            background: rgba(250, 204, 21, 0.1);
-            border: 1px solid rgba(250, 204, 21, 0.25);
-            box-shadow: 0 0 18px rgba(250, 204, 21, 0.1);
-            border-radius: 9999px;
-            padding: 0.2rem 0.55rem;
-            min-width: 58px;
-            text-align: center;
-        }
+        .value-pill { background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 9999px; padding: 0.2rem 0.55rem; min-width: 58px; text-align: center; }
+        #graphPanel { transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; }
+        #graphPanel.is-ready { border-color: rgba(52, 211, 153, 0.85); box-shadow: 0 0 24px rgba(16, 185, 129, 0.14); background-color: rgba(6, 40, 35, 0.45); }
+        #readinessBadge.is-ready { color: #6ee7b7; border-color: rgba(52, 211, 153, 0.55); background: rgba(16, 185, 129, 0.12); }
+        #drawButton.is-ready { background-color: #059669; color: white; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
     <main class="max-w-3xl w-full bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 border border-gray-700">
         <h1 class="text-3xl font-bold text-center text-yellow-500 mb-2">Kinematic Resonance Engine ⚙️</h1>
-        <p class="text-gray-400 text-center mb-6 text-sm">Use the sliders to compare tuning patterns. This preview is for resonance observation only.</p>
+        <p class="text-gray-400 text-center mb-6 text-sm">Adjust the sliders and watch the live preview. Generate a draw whenever you’re ready.</p>
 
-        <section class="mb-8 border border-gray-700 rounded-lg bg-gray-900/50 overflow-hidden">
+        <section class="mb-6 border border-gray-700 rounded-lg bg-gray-900/50 overflow-hidden">
             <button type="button" id="guideToggle" aria-expanded="false" aria-controls="guideContent" class="w-full px-4 py-3 text-left text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 flex justify-between items-center">
-                <span>⚙️ How to tune this simulation</span>
+                <span>⚙️ How to read the preview</span>
                 <svg id="guideIcon" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             <div id="guideContent" class="hidden px-4 py-3 text-sm text-gray-400 border-t border-gray-700 space-y-3 bg-gray-800">
-                <p><strong class="text-sky-400">1.</strong> Move one slider at a time and watch the graph update immediately.</p>
-                <p><strong class="text-sky-400">2.</strong> The red sections show when the combined wave crosses the 1.90 trapdoor threshold.</p>
-                <p><strong class="text-sky-400">3.</strong> Use the <strong class="text-yellow-400">Time above threshold</strong> value and the <strong class="text-red-400">Openings</strong> count to compare patterns.</p>
-                <p><strong class="text-sky-400">4.</strong> When the waveform shows repeated threshold crossings, press <strong class="text-gray-200">Spin Virtual Drum</strong> to generate the result.</p>
-                <p class="text-yellow-300">This is a tuning aid for the preview only. It does not predict the generated numbers or the outcome of a draw.</p>
+                <p><strong class="text-sky-400">1.</strong> Adjust either slider; the graph updates as you move it.</p>
+                <p><strong class="text-sky-400">2.</strong> Red marks show moments the combined wave crosses the dashed 1.90 line. The green graph frame means at least three crossings appeared in the 10-second preview.</p>
+                <p><strong class="text-sky-400">3.</strong> When the frame turns green, the preview has repeated crossings. You can press <strong class="text-gray-200">Spin Virtual Drum</strong>. You can also spin at any time—the green state is only a visual cue.</p>
+                <p class="text-yellow-300">“Time above threshold” is the share of the preview spent above 1.90. A small percentage is normal because 1.90 is close to the wave’s maximum of 2. This diagnostic does not rate or predict the generated numbers.</p>
             </div>
         </section>
 
-        <form id="drawForm" class="space-y-6 mb-6">
+        <form id="drawForm" class="space-y-5 mb-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label for="motorInput" class="text-sm font-medium text-gray-300">Motor Base (Hz)</label>
-                        <output id="motorValue" for="motorInput" class="value-pill text-sm font-semibold text-yellow-400">0.75</output>
-                    </div>
+                    <div class="flex justify-between items-center mb-2"><label for="motorInput" class="text-sm font-medium text-gray-300">Motor Base (Hz)</label><output id="motorValue" for="motorInput" class="value-pill text-sm font-semibold text-yellow-400">0.75</output></div>
                     <div class="seek-wrap"><input type="range" id="motorInput" step="0.01" min="0.1" max="5.0" value="0.75" aria-label="Motor Base frequency"></div>
                     <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1 Hz</span><span>5.0 Hz</span></div>
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label for="kineticInput" class="text-sm font-medium text-gray-300">Kinetic Mass (Hz)</label>
-                        <output id="kineticValue" for="kineticInput" class="value-pill text-sm font-semibold text-yellow-400">3.14</output>
-                    </div>
+                    <div class="flex justify-between items-center mb-2"><label for="kineticInput" class="text-sm font-medium text-gray-300">Kinetic Mass (Hz)</label><output id="kineticValue" for="kineticInput" class="value-pill text-sm font-semibold text-yellow-400">3.14</output></div>
                     <div class="seek-wrap"><input type="range" id="kineticInput" step="0.01" min="0.1" max="10.0" value="3.14" aria-label="Kinetic Mass frequency"></div>
                     <div class="flex justify-between text-[10px] text-gray-500 mt-2"><span>0.1 Hz</span><span>10.0 Hz</span></div>
                 </div>
             </div>
-            <button type="submit" id="drawButton" class="w-full bg-yellow-600 hover:bg-yellow-500 disabled:opacity-60 disabled:cursor-wait text-gray-900 font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(202,138,4,0.5)]">Spin Virtual Drum</button>
+            <button type="submit" id="drawButton" class="w-full bg-yellow-600 hover:bg-yellow-500 disabled:opacity-60 disabled:cursor-wait text-gray-900 font-bold py-3 px-4 rounded-lg transition-all duration-200">Spin Virtual Drum</button>
         </form>
 
-        <section class="mb-6" aria-labelledby="previewTitle">
+        <section id="resultsContainer" class="hidden mb-6 rounded-lg border border-yellow-600/40 bg-gray-900/70 p-4 sm:p-5" aria-live="polite" aria-labelledby="resultTitle">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <h2 id="resultTitle" class="text-lg font-semibold text-gray-200">Generated result</h2>
+                <span class="text-xs text-gray-500">From this simulation</span>
+            </div>
+            <div id="ballsWrapper" class="flex justify-center items-center gap-3 flex-wrap"></div>
+        </section>
+        <p id="errorMessage" class="hidden text-red-400 text-center text-sm mb-5" role="alert"></p>
+
+        <section class="mb-2" aria-labelledby="previewTitle">
             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-3">
                 <div>
                     <h2 id="previewTitle" class="text-lg font-semibold text-gray-200">10-second resonance preview</h2>
-                    <p class="text-xs text-gray-500 mt-1">The waveform is tracked against a fixed 1.90 trapdoor threshold.</p>
+                    <p class="text-xs text-gray-500 mt-1">Look for red crossings of the dashed trapdoor threshold.</p>
                 </div>
                 <div class="flex gap-2">
-                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
+                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2">
                         <div class="text-[10px] uppercase tracking-wide text-gray-500">Time above threshold</div>
                         <div class="text-xl font-bold text-yellow-400"><span id="thresholdTime">0</span><span class="text-sm text-gray-500">%</span></div>
                     </div>
-                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
+                    <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2">
                         <div class="text-[10px] uppercase tracking-wide text-gray-500">Openings</div>
                         <div class="text-xl font-bold text-red-400"><span id="openingCount">0</span><span class="text-sm text-gray-500"> / 10s</span></div>
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700">
-                <div class="relative h-64 sm:h-72"><canvas id="waveChart" role="img" aria-label="Resonance preview graph showing wave amplitude and threshold crossings"></canvas></div>
-                <p id="scoreExplanation" class="text-xs text-gray-500 mt-3">This shows what percent of the preview sits above the 1.90 threshold. It is a diagnostic for comparing tuning patterns; it is not a prediction of or score for the final draw.</p>
+            <div id="graphPanel" class="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <span class="text-xs text-gray-400">Combined wave crossing the 1.90 threshold</span>
+                    <span id="readinessBadge" class="text-xs text-gray-400 border border-gray-700 rounded-full px-3 py-1" role="status" aria-live="polite">Adjust sliders to explore the pattern</span>
+                </div>
+                <div class="relative h-64 sm:h-72"><canvas id="waveChart" role="img" aria-label="Live resonance graph displaying individual waves, combined wave, and trapdoor threshold"></canvas></div>
+                <p class="text-xs text-gray-500 mt-3">Small time-above-threshold percentages are expected: the 1.90 threshold is near the combined wave’s maximum of 2. Compare the crossings, not a target percentage. The preview is a visual aid, not a prediction.</p>
             </div>
         </section>
-
-        <section id="resultsContainer" class="hidden" aria-live="polite">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-700 pt-5 mb-4">
-                <h2 class="text-lg font-semibold text-gray-200">Generated result</h2>
-                <div class="text-sm text-gray-300">Threshold time in this preview: <strong class="text-yellow-400"><span id="resultScore">0</span>%</strong></div>
-            </div>
-            <p class="text-xs text-gray-500 text-center mb-4">The preview values are for resonance comparison only; they do not determine outcome.</p>
-            <div id="ballsWrapper" class="flex justify-center items-center gap-3 flex-wrap mb-8"></div>
-        </section>
-        <p id="errorMessage" class="hidden text-red-400 text-center text-sm" role="alert"></p>
     </main>
 
     <script>
         const THRESHOLD = 1.9;
         const PREVIEW_SECONDS = 10;
         const SAMPLE_STEP = 0.02;
+        const REPEATED_CROSSINGS = 3;
         let waveChartInstance = null;
 
         const motorInput = document.getElementById('motorInput');
@@ -175,7 +149,6 @@
                 const kinetic = Math.sin(2 * Math.PI * kineticHz * t);
                 const combined = motor + kinetic;
                 const isOpen = combined > THRESHOLD;
-
                 labels.push(t);
                 motorWave.push(motor);
                 kineticWave.push(kinetic);
@@ -184,22 +157,22 @@
                 if (isOpen && !wasOpen) openings++;
                 wasOpen = isOpen;
             }
-
-            return {
-                labels,
-                motorWave,
-                kineticWave,
-                combinedWave,
-                score: Math.round((activeSamples / combinedWave.length) * 100),
-                openings
-            };
+            return { labels, motorWave, kineticWave, combinedWave, timePercent: Math.round(activeSamples / combinedWave.length * 100), openings };
         }
 
         function drawResonanceChart(motorHz, kineticHz) {
             const preview = buildPreview(motorHz, kineticHz);
-            document.getElementById('thresholdTime').textContent = preview.score;
+            const isReady = preview.openings >= REPEATED_CROSSINGS;
+            document.getElementById('thresholdTime').textContent = preview.timePercent;
             document.getElementById('openingCount').textContent = preview.openings;
-            document.getElementById('resultScore').textContent = preview.score;
+            const panel = document.getElementById('graphPanel');
+            const badge = document.getElementById('readinessBadge');
+            panel.classList.toggle('is-ready', isReady);
+            badge.classList.toggle('is-ready', isReady);
+            badge.textContent = isReady
+                ? `Repeated crossings detected (${preview.openings}) — ready to spin`
+                : `${preview.openings} crossing${preview.openings === 1 ? '' : 's'} — adjust sliders for repeated crossings`;
+            drawButton.classList.toggle('is-ready', isReady);
 
             if (waveChartInstance) waveChartInstance.destroy();
             waveChartInstance = new Chart(document.getElementById('waveChart').getContext('2d'), {
@@ -207,60 +180,27 @@
                 data: {
                     labels: preview.labels,
                     datasets: [
+                        { label: 'Motor wave', data: preview.motorWave, borderColor: 'rgba(250, 204, 21, 0.5)', borderWidth: 1.4, pointRadius: 0, tension: 0.1 },
+                        { label: 'Kinetic wave', data: preview.kineticWave, borderColor: 'rgba(167, 139, 250, 0.6)', borderWidth: 1.4, pointRadius: 0, tension: 0.1 },
                         {
-                            label: 'Motor wave', data: preview.motorWave,
-                            borderColor: 'rgba(250, 204, 21, 0.45)', borderWidth: 1.5,
-                            pointRadius: 0, tension: 0.15
+                            label: 'Combined wave', data: preview.combinedWave,
+                            borderColor: '#38bdf8', segment: { borderColor: context => context.p1.parsed.y > THRESHOLD ? '#f87171' : '#38bdf8' },
+                            borderWidth: 2.5, pointRadius: context => context.raw > THRESHOLD ? 2 : 0,
+                            pointBackgroundColor: '#f87171', tension: 0.1
                         },
-                        {
-                            label: 'Kinetic wave', data: preview.kineticWave,
-                            borderColor: 'rgba(167, 139, 250, 0.55)', borderWidth: 1.5,
-                            pointRadius: 0, tension: 0.15
-                        },
-                        {
-                            label: 'Combined resonance', data: preview.combinedWave,
-                            borderColor: (context) => {
-                                const value = context.raw;
-                                return value !== undefined && value > THRESHOLD ? '#f87171' : '#38bdf8';
-                            },
-                            segment: { borderColor: (context) => context.p1.parsed.y > THRESHOLD ? '#f87171' : '#38bdf8' },
-                            borderWidth: 2.5, pointRadius: (context) => context.raw > THRESHOLD ? 2 : 0,
-                            pointBackgroundColor: '#f87171', tension: 0.15
-                        },
-                        {
-                            label: 'Trapdoor threshold (1.90)',
-                            data: preview.labels.map(() => THRESHOLD),
-                            borderColor: 'rgba(248, 113, 113, 0.7)', borderWidth: 1,
-                            borderDash: [6, 5], pointRadius: 0, tension: 0
-                        }
+                        { label: 'Trapdoor threshold (1.90)', data: preview.labels.map(() => THRESHOLD), borderColor: 'rgba(248, 113, 113, 0.75)', borderWidth: 1, borderDash: [6, 5], pointRadius: 0 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: true, position: 'bottom', labels: { color: '#9ca3af', usePointStyle: true, boxWidth: 8, padding: 14 } },
-                        tooltip: {
-                            callbacks: {
-                                title: (items) => `${Number(items[0].label).toFixed(2)} seconds`,
-                                label: (item) => `${item.dataset.label}: ${Number(item.raw).toFixed(2)}`
-                            }
-                        }
+                        legend: { display: true, position: 'bottom', labels: { color: '#9ca3af', usePointStyle: true, boxWidth: 8, padding: 12 } },
+                        tooltip: { callbacks: { title: items => `${Number(items[0].label).toFixed(2)} seconds`, label: item => `${item.dataset.label}: ${Number(item.raw).toFixed(2)}` } }
                     },
                     scales: {
-                        x: {
-                            type: 'linear', min: 0, max: PREVIEW_SECONDS,
-                            title: { display: true, text: 'Time (seconds)', color: '#9ca3af' },
-                            ticks: { color: '#6b7280', maxTicksLimit: 6 },
-                            grid: { color: 'rgba(75, 85, 99, 0.18)' }
-                        },
-                        y: {
-                            min: -2.1, max: 2.1,
-                            title: { display: true, text: 'Wave amplitude', color: '#9ca3af' },
-                            ticks: { color: '#6b7280' },
-                            grid: { color: 'rgba(75, 85, 99, 0.25)' }
-                        }
+                        x: { type: 'linear', min: 0, max: PREVIEW_SECONDS, title: { display: true, text: 'Time (seconds)', color: '#9ca3af' }, ticks: { color: '#6b7280', maxTicksLimit: 6 }, grid: { color: 'rgba(75, 85, 99, 0.18)' } },
+                        y: { min: -2.1, max: 2.1, title: { display: true, text: 'Wave amplitude', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: 'rgba(75, 85, 99, 0.25)' } }
                     }
                 }
             });
@@ -271,48 +211,44 @@
             updateSeekFill(input);
             drawResonanceChart(Number(motorInput.value), Number(kineticInput.value));
         }
-
         motorInput.addEventListener('input', () => syncSlider(motorInput, 'motorValue'));
         kineticInput.addEventListener('input', () => syncSlider(kineticInput, 'kineticValue'));
         syncSlider(motorInput, 'motorValue');
         syncSlider(kineticInput, 'kineticValue');
 
-        document.getElementById('drawForm').addEventListener('submit', async (event) => {
+        document.getElementById('drawForm').addEventListener('submit', async event => {
             event.preventDefault();
             const wrapper = document.getElementById('ballsWrapper');
             const errorMessage = document.getElementById('errorMessage');
-            const motorHz = Number(motorInput.value);
-            const kineticHz = Number(kineticInput.value);
             wrapper.innerHTML = '';
             errorMessage.classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
-            drawResonanceChart(motorHz, kineticHz);
             drawButton.disabled = true;
             drawButton.textContent = 'Simulating…';
-
             try {
-                const params = new URLSearchParams({ motor: String(motorHz), kinetic: String(kineticHz) });
+                const params = new URLSearchParams({ motor: motorInput.value, kinetic: kineticInput.value });
                 const response = await fetch(`api/draw?${params}`);
                 const data = await response.json();
                 if (!response.ok || data.error) throw new Error(data.error || 'The draw request failed.');
-
                 data.yielded_numbers.forEach((number, index) => {
                     const ball = document.createElement('div');
-                    ball.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center text-gray-900 font-bold text-xl shadow-lg';
+                    ball.className = 'ball show w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center text-gray-900 font-bold text-xl shadow-lg';
                     ball.textContent = number;
                     wrapper.appendChild(ball);
-                    setTimeout(() => ball.classList.add('show'), index * 150);
+                    ball.classList.remove('show');
+                    requestAnimationFrame(() => ball.classList.add('show'));
                 });
                 const plus = document.createElement('div');
-                plus.className = 'ball w-8 h-12 flex items-center justify-center text-gray-500 font-bold text-2xl show';
+                plus.className = 'ball show w-8 h-12 flex items-center justify-center text-gray-500 font-bold text-2xl';
                 plus.textContent = '+';
                 wrapper.appendChild(plus);
                 const strongBall = document.createElement('div');
-                strongBall.className = 'ball w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center text-white font-bold text-xl shadow-lg';
+                strongBall.className = 'ball show w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center text-white font-bold text-xl shadow-lg';
                 strongBall.textContent = data.strong_number;
                 wrapper.appendChild(strongBall);
-                setTimeout(() => strongBall.classList.add('show'), 900);
+                requestAnimationFrame(() => { plus.classList.add('show'); strongBall.classList.add('show'); });
             } catch (error) {
+                document.getElementById('resultsContainer').classList.add('hidden');
                 errorMessage.textContent = error.message || 'Could not generate a result. Please try again.';
                 errorMessage.classList.remove('hidden');
             } finally {
