@@ -62,19 +62,19 @@
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
     <main class="max-w-3xl w-full bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 border border-gray-700">
         <h1 class="text-3xl font-bold text-center text-yellow-500 mb-2">Kinematic Resonance Engine ⚙️</h1>
-        <p class="text-gray-400 text-center mb-6 text-sm">Use the sliders to find a stable resonance pattern. Higher scores mean stronger pressure spikes in the preview graph.</p>
+        <p class="text-gray-400 text-center mb-6 text-sm">Use the sliders to compare tuning patterns. This preview is for resonance observation only.</p>
 
         <section class="mb-8 border border-gray-700 rounded-lg bg-gray-900/50 overflow-hidden">
             <button type="button" id="guideToggle" aria-expanded="false" aria-controls="guideContent" class="w-full px-4 py-3 text-left text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 flex justify-between items-center">
-                <span>⚙️ How to get a better result</span>
+                <span>⚙️ How to tune this simulation</span>
                 <svg id="guideIcon" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             <div id="guideContent" class="hidden px-4 py-3 text-sm text-gray-400 border-t border-gray-700 space-y-3 bg-gray-800">
-                <p><strong class="text-sky-400">1.</strong> Start with a mid-range value and move one slider at a time.</p>
-                <p><strong class="text-sky-400">2.</strong> Watch the graph and score. The best tuning is the one with frequent red spikes crossing the trapdoor line.</p>
-                <p><strong class="text-sky-400">3.</strong> Aim for a score above <strong class="text-yellow-400">60</strong> for a visibly energetic resonance pattern.</p>
-                <p><strong class="text-sky-400">4.</strong> When the red spikes look clean and repeated, press <strong class="text-gray-200">Spin Virtual Drum</strong> to generate the draw.</p>
-                <p class="text-yellow-300">The score is a tuning guide for the resonance preview. It is not a prediction of outcome or a guarantee of a winning result.</p>
+                <p><strong class="text-sky-400">1.</strong> Move one slider at a time and watch the graph update immediately.</p>
+                <p><strong class="text-sky-400">2.</strong> The red sections show when the combined wave crosses the 1.90 trapdoor threshold.</p>
+                <p><strong class="text-sky-400">3.</strong> Use the <strong class="text-yellow-400">Time above threshold</strong> value and the <strong class="text-red-400">Openings</strong> count to compare patterns.</p>
+                <p><strong class="text-sky-400">4.</strong> When the waveform shows repeated threshold crossings, press <strong class="text-gray-200">Spin Virtual Drum</strong> to generate the result.</p>
+                <p class="text-yellow-300">This is a tuning aid for the preview only. It does not predict the generated numbers or the outcome of a draw.</p>
             </div>
         </section>
 
@@ -104,12 +104,12 @@
             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-3">
                 <div>
                     <h2 id="previewTitle" class="text-lg font-semibold text-gray-200">10-second resonance preview</h2>
-                    <p class="text-xs text-gray-500 mt-1">Red peaks show where the threshold is crossed. More repeats usually means a stronger pattern.</p>
+                    <p class="text-xs text-gray-500 mt-1">The waveform is tracked against a fixed 1.90 trapdoor threshold.</p>
                 </div>
                 <div class="flex gap-2">
                     <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
-                        <div class="text-[10px] uppercase tracking-wide text-gray-500">Activity score</div>
-                        <div class="text-xl font-bold text-yellow-400"><span id="activityScore">0</span><span class="text-sm text-gray-500">/100</span></div>
+                        <div class="text-[10px] uppercase tracking-wide text-gray-500">Time above threshold</div>
+                        <div class="text-xl font-bold text-yellow-400"><span id="thresholdTime">0</span><span class="text-sm text-gray-500">%</span></div>
                     </div>
                     <div class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 min-w-28">
                         <div class="text-[10px] uppercase tracking-wide text-gray-500">Openings</div>
@@ -119,16 +119,16 @@
             </div>
             <div class="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700">
                 <div class="relative h-64 sm:h-72"><canvas id="waveChart" role="img" aria-label="Resonance preview graph showing wave amplitude and threshold crossings"></canvas></div>
-                <p id="scoreExplanation" class="text-xs text-gray-500 mt-3">A higher score means the combined wave spends more time above the 1.90 trapdoor threshold. Use it as a quick way to compare tuning choices before generating a draw.</p>
+                <p id="scoreExplanation" class="text-xs text-gray-500 mt-3">This shows what percent of the preview sits above the 1.90 threshold. It is a diagnostic for comparing tuning patterns; it is not a prediction of or score for the final draw.</p>
             </div>
         </section>
 
         <section id="resultsContainer" class="hidden" aria-live="polite">
             <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-700 pt-5 mb-4">
                 <h2 class="text-lg font-semibold text-gray-200">Generated result</h2>
-                <div class="text-sm text-gray-300">Current tuning score: <strong class="text-yellow-400"><span id="resultScore">0</span>/100</strong></div>
+                <div class="text-sm text-gray-300">Threshold time in this preview: <strong class="text-yellow-400"><span id="resultScore">0</span>%</strong></div>
             </div>
-            <p class="text-xs text-gray-500 text-center mb-4">This score reflects the preview resonance pattern, not the final draw’s outcome.</p>
+            <p class="text-xs text-gray-500 text-center mb-4">The preview values are for resonance comparison only; they do not determine outcome.</p>
             <div id="ballsWrapper" class="flex justify-center items-center gap-3 flex-wrap mb-8"></div>
         </section>
         <p id="errorMessage" class="hidden text-red-400 text-center text-sm" role="alert"></p>
@@ -197,7 +197,7 @@
 
         function drawResonanceChart(motorHz, kineticHz) {
             const preview = buildPreview(motorHz, kineticHz);
-            document.getElementById('activityScore').textContent = preview.score;
+            document.getElementById('thresholdTime').textContent = preview.score;
             document.getElementById('openingCount').textContent = preview.openings;
             document.getElementById('resultScore').textContent = preview.score;
 
